@@ -25,4 +25,10 @@ jobs:
           publish: pnpm changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # setup-node's registry-url writes an .npmrc containing
+          # `_authToken=${NODE_AUTH_TOKEN}` — that is the name npm actually
+          # expands at publish time. With only NPM_TOKEN set it resolves to an
+          # empty string, npm still treats auth as "configured", and publish
+          # dies with ENEEDAUTH. Both names, same secret.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

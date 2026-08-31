@@ -17,10 +17,13 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Build FIRST: playground and storybook import flowrap as a package, so
+      # `exports` sends them to dist/ — which isn't in git. Type-checking them
+      # before the build fails with "Cannot find module 'flowrap'".
+      - run: pnpm --filter flowrap build
       - run: pnpm -r lint
       - run: pnpm -r check
       - run: pnpm -r test
-      - run: pnpm --filter flowrap build
       # Storybook builds from dist, which also catches broken stories
       - run: pnpm --filter flowrap-storybook build
 
