@@ -1,6 +1,6 @@
 {
   "name": "flowrap",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Wrapper-first flow board for Svelte 5: wrap any snippet in <FlowNode> and get drag, zoom and pan.",
   "license": "MIT",
   "type": "module",
