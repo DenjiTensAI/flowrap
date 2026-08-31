@@ -19,6 +19,21 @@ nodes, with no separate `edges[]` array and no type registration. So do
 ports: `<FlowHandle>` goes inside a card, and dragging from it ends in an
 `onconnect` call on the board.
 
+[GitHub](https://github.com/DenjiTensAI/flowrap) ·
+[npm](https://www.npmjs.com/package/flowrap) ·
+[Full API reference](https://github.com/DenjiTensAI/flowrap#readme) ·
+[Документация на русском](https://github.com/DenjiTensAI/flowrap/blob/main/docs/README.ru.md)
+
+## Install
+
+```bash
+pnpm add flowrap
+```
+
+`svelte@^5` is the only peer dependency. There is no CSS file to import —
+the core styles live in the components' own `<style>` blocks, and every
+visual decision is left to yours.
+
 ## The parent must have a non-zero height
 
 `.fr-viewport` is declared as `height: 100%`, which means **you set the
@@ -28,12 +43,15 @@ here relies on the `.board-host` class (`height: 70vh`) for that.
 
 ## Scenarios
 
+Open the **Code** panel next to any canvas — each story's source is the
+real explanation, and it is short enough to read end to end.
+
 | Story | What it shows |
 |---|---|
 | **Showcase / Order pipeline** | the whole library on one screen, light and dark |
 | **FlowBoard / Basic** | text, a button and an image inside nodes; drag, zoom, pan |
 | **FlowBoard / Zoom limits** | `bind:zoom`, `minZoom`/`maxZoom`/`zoomSpeed`, zoom to cursor |
-| **FlowBoard / Many nodes** | 200 nodes as a load test |
+| **FlowBoard / Many nodes** | 200 nodes, and 200 nodes with 199 edges, as a load test |
 | **FlowBoard / Positions sync** | `bind:positions`, saving and loading a layout |
 | **FlowNode / Controlled** | controlled vs uncontrolled, `disabled` |
 | **FlowEdge / Edges** | three line types, two edges between one pair, a data-driven graph, CSS theming |

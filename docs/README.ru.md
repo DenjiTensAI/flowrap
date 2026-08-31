@@ -13,6 +13,10 @@
   <a href="../README.md">English</a> · <b>Русский</b>
 </p>
 
+<p align="center">
+  <a href="https://denjitensai.github.io/flowrap/"><b>Живой Storybook →</b></a>
+</p>
+
 ---
 
 flowrap **headless в части CSS**. Библиотека даёт поведение — математику
@@ -462,7 +466,10 @@ const world = screenToFlow({ x: e.clientX - rect.left, y: e.clientY - rect.top }
 
 ## Примеры
 
-Два места, оба на одних и тех же сценариях:
+**[Живой Storybook](https://denjitensai.github.io/flowrap/)** — все стори
+прямо в браузере, ставить ничего не нужно.
+
+Запустить те же сценарии локально:
 
 ```bash
 pnpm storybook                    # витрина компонентов, включая доску выше

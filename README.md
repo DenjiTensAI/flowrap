@@ -9,6 +9,10 @@
   Wrap the component you already have — get drag, zoom, pan, ports and links.
 </p>
 
+<p align="center">
+  <a href="https://denjitensai.github.io/flowrap/"><b>Live Storybook →</b></a>
+</p>
+
 ---
 
 flowrap is **headless when it comes to CSS**. It ships the behaviour — pointer
@@ -458,7 +462,10 @@ If any check fails, the preview line disappears and `onconnect` is not called.
 
 ## Examples
 
-Two places to look, both driven by the same scenarios:
+**[Live Storybook](https://denjitensai.github.io/flowrap/)** — every story
+in the browser, nothing to install.
+
+To run the same scenarios locally:
 
 ```bash
 pnpm storybook                    # component gallery, includes the board above
