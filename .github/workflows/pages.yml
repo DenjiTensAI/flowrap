@@ -1,0 +1,49 @@
+name: Deploy Storybook
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages нужны эти права на уровне job'а деплоя; id-token — для OIDC,
+# которым actions/deploy-pages подтверждает происхождение артефакта.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Параллельные деплои Pages конфликтуют друг с другом. Не отменяем уже
+# запущенный: прерванный деплой оставляет окружение в промежуточном состоянии.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Как и в CI: storybook импортирует flowrap как пакет, а `exports`
+      # ведёт в dist/, которого нет в git.
+      - run: pnpm --filter flowrap build
+      - run: pnpm --filter flowrap-storybook build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: storybook/storybook-static
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
