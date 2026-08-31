@@ -1,0 +1,43 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Introduction" />
+
+# flowrap
+
+A wrapper-first board for Svelte 5. You don't register node types or
+describe your data up front — you wrap a component you already have in a
+wrapper that gives it a position and dragging:
+
+```svelte
+<FlowNode id="my-card">
+  <MyExistingComponent />
+</FlowNode>
+```
+
+Edges work the same way: `<FlowEdge from to />` is declared next to the
+nodes, with no separate `edges[]` array and no type registration. So do
+ports: `<FlowHandle>` goes inside a card, and dragging from it ends in an
+`onconnect` call on the board.
+
+## The parent must have a non-zero height
+
+`.fr-viewport` is declared as `height: 100%`, which means **you set the
+height**. If the wrapper around `<FlowBoard>` has none, the board
+collapses to nothing and looks broken — no nodes, no dragging. Every story
+here relies on the `.board-host` class (`height: 70vh`) for that.
+
+## Scenarios
+
+| Story | What it shows |
+|---|---|
+| **Showcase / Order pipeline** | the whole library on one screen, light and dark |
+| **FlowBoard / Basic** | text, a button and an image inside nodes; drag, zoom, pan |
+| **FlowBoard / Zoom limits** | `bind:zoom`, `minZoom`/`maxZoom`/`zoomSpeed`, zoom to cursor |
+| **FlowBoard / Many nodes** | 200 nodes as a load test |
+| **FlowBoard / Positions sync** | `bind:positions`, saving and loading a layout |
+| **FlowNode / Controlled** | controlled vs uncontrolled, `disabled` |
+| **FlowEdge / Edges** | three line types, two edges between one pair, a data-driven graph, CSS theming |
+| **FlowHandle / Connectors** | ports, dragging connections, `isValidConnection`, ports on four sides |
+
+The same scenarios live in `playground/` as SvelteKit routes — that's what
+the Playwright e2e tests point at.

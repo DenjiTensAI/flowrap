@@ -1,0 +1,13 @@
+node_modules
+dist
+.svelte-kit
+build
+storybook-static
+test-results
+playwright-report
+*.tgz
+.DS_Store
+.idea
+
+# generated from the root README by packages/flowrap/scripts/gen-readme.js
+packages/flowrap/README.md

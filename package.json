@@ -1,0 +1,26 @@
+{
+  "name": "flowrap-monorepo",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "pnpm --filter flowrap build",
+    "test": "pnpm -r test",
+    "check": "pnpm -r check",
+    "lint": "pnpm -r lint",
+    "e2e": "playwright test --config e2e/playwright.config.ts",
+    "storybook": "pnpm --filter flowrap-storybook dev",
+    "build:storybook": "pnpm --filter flowrap-storybook build"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.1",
+    "@playwright/test": "^1.62.1"
+  },
+  "repository": "github:DenjiTensAI/flowrap",
+  "author": "Denis Movsumov (DMovsumov)",
+  "homepage": "https://github.com/DenjiTensAI/flowrap#readme",
+  "bugs": "https://github.com/DenjiTensAI/flowrap/issues"
+}

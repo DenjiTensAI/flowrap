@@ -1,0 +1,66 @@
+{
+  "name": "flowrap",
+  "version": "0.1.0",
+  "description": "Wrapper-first flow board for Svelte 5: wrap any snippet in <FlowNode> and get drag, zoom and pan.",
+  "license": "MIT",
+  "type": "module",
+  "svelte": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "svelte": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "llms.txt"
+  ],
+  "sideEffects": false,
+  "keywords": [
+    "svelte",
+    "svelte5",
+    "flow",
+    "diagram",
+    "drag",
+    "zoom",
+    "pan",
+    "canvas"
+  ],
+  "scripts": {
+    "build": "svelte-package && node scripts/prune-dist.js && node scripts/gen-readme.js",
+    "prepack": "node scripts/gen-readme.js",
+    "test": "vitest run",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "lint": "eslint .",
+    "dev": "svelte-package --watch"
+  },
+  "peerDependencies": {
+    "svelte": "^5.57.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@sveltejs/package": "2.5.8",
+    "@sveltejs/vite-plugin-svelte": "7.3.0",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/svelte": "5.4.2",
+    "eslint": "10.9.1",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-svelte": "3.23.0",
+    "globals": "17.11.0",
+    "jsdom": "30.0.1",
+    "prettier": "3.9.6",
+    "prettier-plugin-svelte": "4.1.1",
+    "svelte": "5.56.10",
+    "svelte-check": "4.7.6",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.68.0",
+    "vite": "8.2.2",
+    "vitest": "4.1.11"
+  },
+  "repository": "github:DenjiTensAI/flowrap",
+  "author": "Denis Movsumov (DMovsumov)",
+  "homepage": "https://github.com/DenjiTensAI/flowrap#readme",
+  "bugs": "https://github.com/DenjiTensAI/flowrap/issues"
+}

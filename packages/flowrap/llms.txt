@@ -1,0 +1,316 @@
+# flowrap
+
+> A wrapper-first board for Svelte 5: zoom, pan, node dragging, edges, and
+> links you draw with the mouse. You wrap YOUR existing component and get a
+> position, a drag gesture and ports — with no "node types" to register and no
+> data schema to declare up front.
+
+This file is the complete public API reference in one self-contained document.
+It matches the installed version of the package.
+
+- Requires `svelte@^5` (peer dependency).
+- Install: `npm i flowrap`
+- There is NO separate CSS file to import: the styles live in the components'
+  own `<style>` blocks.
+
+## ⚠️ Two things that break everything if you don't know them
+
+**1. The element around `<FlowBoard>` must have a non-zero height.**
+`.fr-viewport` is declared as `height: 100%`, so the height comes from the
+consumer. Without it the board collapses to zero: no nodes visible, no dragging,
+everything looks broken. This is the single most common first problem.
+
+```svelte
+<div><FlowBoard>…</FlowBoard></div>                       <!-- EMPTY -->
+<div style="height: 70vh"><FlowBoard>…</FlowBoard></div>  <!-- correct -->
+```
+
+**2. The library does not own the graph and does not create edges.**
+A mouse drag ends by calling `onconnect` with a description of the connection —
+that's all. Putting the link into your own array, sending it to a server, or
+rejecting it is the consumer's decision. Deletion works the same way: remove the
+item from your array and the `<FlowEdge>` disappears. There is no
+`board.addEdge()` method and there will not be one.
+
+## Exports
+
+Exactly six, plus types:
+
+```ts
+import {
+  FlowBoard,    // the board: zoom, pan, the SVG layer for edges
+  FlowNode,     // wrapper around your markup: position + drag
+  FlowEdge,     // a link between nodes (headless, renders nothing itself)
+  FlowHandle,   // a port you drag a link from
+  screenToFlow, // screen → world
+  flowToScreen  // world → screen
+} from 'flowrap';
+
+import type {
+  Position,     // { x: number; y: number }
+  Viewport,     // { pan: Position; zoom: number }
+  Connection,   // { from, to, fromHandle?, toHandle? } — what onconnect gives you
+  EdgePathType, // 'straight' | 'bezier' | 'step'
+  HandleType    // 'source' | 'target' | 'both'
+} from 'flowrap';
+```
+
+## `<FlowBoard>`
+
+| Prop | Type | Default | |
+|---|---|---|---|
+| `zoom` | `number` | `1` | `$bindable` |
+| `pan` | `Position` | `{ x: 0, y: 0 }` | `$bindable` |
+| `positions` | `Record<string, Position>` | `{}` | `$bindable`, snapshot of the whole board |
+| `minZoom` | `number` | `0.1` | |
+| `maxZoom` | `number` | `4` | |
+| `zoomSpeed` | `number` | `0.002` | `zoom * Math.exp(-deltaY * zoomSpeed)` |
+| `onconnect` | `(c: Connection) => void` | — | a drag ended on a valid drop |
+| `isValidConnection` | `(c: Connection) => boolean` | — | your own connection policy |
+
+Dragging the background pans the board; the wheel zooms towards the cursor. A
+drag that starts on a node or a port does not pan the board.
+
+## `<FlowNode>`
+
+| Prop | Type | Default | |
+|---|---|---|---|
+| `id` | `string` | — | required, unique within the board |
+| `x` | `number` | `0` | `$bindable` |
+| `y` | `number` | `0` | `$bindable` |
+| `disabled` | `boolean` | `false` | disables dragging |
+
+The wrapper gets a `data-fr-node={id}` attribute — that's what tests and styles
+target. It must be rendered inside `<FlowBoard>`, otherwise it throws.
+
+There is no controlled/uncontrolled flag — `bind:` decides:
+
+```svelte
+<FlowNode id="a" x={40} y={40}>…</FlowNode>   <!-- the node keeps its position -->
+<FlowNode id="a" bind:x bind:y>…</FlowNode>   <!-- the parent owns the position -->
+```
+
+## `<FlowEdge>`
+
+| Prop | Type | Default | |
+|---|---|---|---|
+| `from` | `string` | — | source node id |
+| `to` | `string` | — | target node id |
+| `type` | `'bezier' \| 'straight' \| 'step'` | `'bezier'` | line shape |
+| `id` | `string` | `$props.id()` | registry key |
+| `fromHandle` | `string` | — | port id on the `from` end |
+| `toHandle` | `string` | — | port id on the `to` end |
+
+Declared inside `<FlowBoard>`, next to the nodes. It **renders nothing itself**:
+it registers with the board's context, and one shared SVG layer draws the lines —
+beneath the nodes and with `pointer-events: none`, so it never intercepts panning
+or dragging. An edge with an unknown `from`/`to` is silently not drawn. Two edges
+between the same pair of nodes do not collapse into one.
+
+## `<FlowHandle>`
+
+| Prop | Type | Default | |
+|---|---|---|---|
+| `id` | `string` | — | unique WITHIN ITS OWN node |
+| `type` | `'source' \| 'target' \| 'both'` | `'both'` | direction |
+
+Declared **inside the node's content**; it finds its node through context, so
+there is no `node` prop to pass. Any other attributes (`class`, `aria-*`,
+`data-*`) are forwarded to the port element. Where the port ends up is decided by
+your layout, not by a library schema: there is no `handles: [{ position:
+'right' }]`.
+
+## Recipes
+
+### A minimal board with your own component
+
+```svelte
+<script>
+  import { FlowBoard, FlowNode } from 'flowrap';
+  import MyCard from './MyCard.svelte';
+</script>
+
+<div style="height: 70vh">
+  <FlowBoard>
+    <FlowNode id="a" x={40} y={40}><MyCard title="A" /></FlowNode>
+    <FlowNode id="b" x={320} y={200}><MyCard title="B" /></FlowNode>
+  </FlowBoard>
+</div>
+```
+
+### Links: creating by dragging, and deleting
+
+```svelte
+<script>
+  import { FlowBoard, FlowNode, FlowEdge, FlowHandle } from 'flowrap';
+
+  let links = $state([]);
+
+  // The library does NOT create the edge — it only reports the drop.
+  const add = (c) => (links = [...links, { id: crypto.randomUUID(), ...c }]);
+  // Deleting is on your side too: drop it from the array and the edge is gone.
+  const remove = (id) => (links = links.filter((l) => l.id !== id));
+</script>
+
+<div style="height: 70vh">
+  <FlowBoard onconnect={add}>
+    <FlowNode id="a" x={40} y={40}>
+      <div class="card">A <FlowHandle id="out" type="source" /></div>
+    </FlowNode>
+    <FlowNode id="b" x={320} y={200}>
+      <div class="card"><FlowHandle id="in" type="target" /> B</div>
+    </FlowNode>
+
+    {#each links as link (link.id)}
+      <FlowEdge from={link.from} to={link.to}
+                fromHandle={link.fromHandle} toHandle={link.toHandle} />
+    {/each}
+  </FlowBoard>
+</div>
+
+<ul>
+  {#each links as link (link.id)}
+    <li>{link.from} → {link.to}
+      <button onclick={() => remove(link.id)}>delete</button>
+    </li>
+  {/each}
+</ul>
+```
+
+In TypeScript, type the array explicitly — `Connection` has optional handles, so
+inferring the type from a seed array with required ones makes the spread in
+`onconnect` fail to type-check:
+
+```ts
+import type { Connection } from 'flowrap';
+
+type Link = Connection & { id: string };
+let links = $state<Link[]>([]);
+```
+
+### Validating connections
+
+Before `onconnect` fires, a link passes three checks in this order: self-connect
+is rejected → port directions must be compatible → your `isValidConnection`. If
+any of them fails, the preview line disappears and `onconnect` is not called.
+
+```svelte
+<FlowBoard
+  isValidConnection={(c) => !links.some((l) => l.from === c.from && l.to === c.to)}
+  onconnect={add}
+/>
+```
+
+### Saving and restoring a layout
+
+```svelte
+<script>
+  let positions = $state({});
+  const save = () => localStorage.setItem('layout', JSON.stringify(positions));
+  const load = () => {
+    const raw = localStorage.getItem('layout');
+    if (raw) positions = JSON.parse(raw); // the nodes really do move
+  };
+</script>
+
+<FlowBoard bind:positions>…</FlowBoard>
+```
+
+Works both ways. While a node is being dragged, incoming assignments for that
+node are ignored. `bind:x`/`bind:y` and `bind:positions` can be used together;
+assigning to both slices in the same tick is not supported.
+
+### Ports on all four sides of a card
+
+Positioning is yours — the library only supplies the dot and the gesture. The
+card needs `position: relative`.
+
+```svelte
+<FlowNode id="a">
+  <div class="card">
+    <FlowHandle id="n" class="n" />
+    <FlowHandle id="e" class="e" />
+  </div>
+</FlowNode>
+
+<style>
+  .card { position: relative; padding: 16px; }
+  .card :global(.n) { position: absolute; top: -5px;  left: 50%; }
+  .card :global(.e) { position: absolute; right: -5px; top: 50%; }
+</style>
+```
+
+### Appearance
+
+```css
+.my-board {
+  --fr-edge-stroke: #999;
+  --fr-edge-width: 1.5;
+
+  --fr-handle-size: 10px;
+  --fr-handle-bg: #fff;
+  --fr-handle-border: #666;
+
+  --fr-connection-stroke: #4a9eff;  /* the preview line while dragging */
+  --fr-connection-width: 2;
+  --fr-connection-dash: 4 4;
+}
+```
+
+Selectors: `.fr-viewport`, `.fr-world`, `.fr-edges`, `.fr-edge`,
+`.fr-connection`, `.fr-handle`, `[data-fr-node]`, `[data-fr-handle]`.
+
+### Coordinate helpers
+
+```ts
+screenToFlow({ x, y }, { pan, zoom }); // screen → world
+flowToScreen({ x, y }, { pan, zoom }); // world → screen
+```
+
+Both work in coordinates **local to `.fr-viewport`** (the board's top-left corner
+is `{0,0}`), not page coordinates. Convert from `clientX/clientY` yourself:
+
+```ts
+const rect = viewportEl.getBoundingClientRect();
+const local = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+```
+
+## What flowrap does NOT have
+
+Read this section. By analogy with react-flow / svelte-flow it is easy to write
+an API that does not exist here.
+
+- There is no `<MiniMap>`, `<Controls>` or `<Background>` — those components
+  don't exist.
+- There is no `nodes={[]}` / `edges={[]}` prop and no `nodeTypes` registration.
+  Nodes and edges are declared as markup; the graph state is yours.
+- There is no `onEdgeClick`, `onNodeClick`, `deletable`, `selectable`,
+  `board.addEdge()` or `board.deleteEdge()`.
+- **No deleting edges with the mouse and no edge selection.** The edge layer has
+  `pointer-events: none` — without it, panning breaks. Deletion goes through
+  your own array (see the recipe above).
+- **No reconnect** — you cannot drag the end of an existing edge onto another
+  port.
+- No multi-select and no creating several links in one gesture.
+- No arrowheads or markers on edge ends, and no labels on edges.
+- No orthogonal routing around nodes: `type="step"` gives an orthogonal line but
+  does not avoid obstacles.
+- No highlighting of compatible ports during a drag.
+- No magnet to a port across empty space: a drop on the card's body lands on the
+  nearest compatible port OF THAT node, but nothing is attracted through empty
+  space.
+- Self-edges (`from === to`) are not supported: the path degenerates to a point.
+
+## Gotchas
+
+- **A parent with no height** — see the top of this file.
+- **Nodes with no `x`/`y` all sit at `(0,0)`**, and the last one in the DOM
+  intercepts `pointerdown` from the rest. Spread them out with coordinates.
+- **A port is declared inside the node's content**, not next to it. A port
+  outside `<FlowNode>` throws a clear error.
+- **A port moved without a size change** (reordering inside a flex container,
+  changing `order`) does not recompute its geometry: measurement runs through a
+  `ResizeObserver` on the port itself and on its `offsetParent`. The workaround
+  is to change something observable, e.g. the card's size.
+- **SSR/prerender emits the first HTML without lines** — there is no DOM on the
+  server, so node sizes cannot be measured. The lines appear on hydration.

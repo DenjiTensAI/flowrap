@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="flowrap">
+  <title>flowrap</title>
+  <!-- the flow: a link arriving at the left port and leaving from the right -->
+  <g fill="none" stroke="#94a3b8" stroke-width="3" stroke-linecap="round">
+    <path d="M4 5 C 10 5, 5 24, 11 24" />
+    <path d="M37 24 C 43 24, 38 43, 44 43" />
+  </g>
+  <!-- the wrapper: your component, given a position and a drag -->
+  <rect x="11" y="12" width="26" height="24" rx="7"
+        fill="none" stroke="#2563eb" stroke-width="3" />
+  <!-- the ports -->
+  <g fill="#ffffff" stroke="#2563eb" stroke-width="3">
+    <circle cx="11" cy="24" r="3.5" />
+    <circle cx="37" cy="24" r="3.5" />
+  </g>
+</svg>

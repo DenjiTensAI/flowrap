@@ -1,0 +1,10 @@
+packages:
+  - 'packages/*'
+  - 'playground'
+  - 'storybook'
+
+# esbuild installs a native binary in postinstall and Storybook won't
+# start without it. Unless it's allowed explicitly, pnpm 11 blocks every
+# workspace command with ERR_PNPM_IGNORED_BUILDS.
+allowBuilds:
+  esbuild: true

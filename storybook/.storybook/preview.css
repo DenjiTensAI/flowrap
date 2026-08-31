@@ -1,0 +1,98 @@
+/*
+ * The same styles as playground/src/app.css: Storybook shows the same
+ * scenarios, so the cards should look identical in both places.
+ */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+/*
+ * The library's .fr-viewport is height: 100%, so the parent sets the
+ * height. Without .board-host the board collapses: no nodes, no dragging.
+ */
+.board-host {
+  height: 70vh;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+.panel {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.panel code {
+  font-size: 12px;
+}
+
+.card {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  white-space: nowrap;
+  cursor: grab;
+}
+
+/*
+ * A port is an ordinary element: the library only gives it a size and a
+ * shape, this stylesheet decides where it goes. Same as
+ * playground/src/app.css.
+ */
+.card .fr-handle {
+  vertical-align: middle;
+}
+
+/* Ports on all four sides: the card positions them itself. */
+.card.ports {
+  position: relative;
+  padding: 16px 22px;
+}
+
+.card.ports .fr-handle {
+  position: absolute;
+}
+
+.card.ports .fr-handle.n {
+  top: -6px;
+  left: 50%;
+  margin-left: -6px;
+}
+
+.card.ports .fr-handle.s {
+  bottom: -6px;
+  left: 50%;
+  margin-left: -6px;
+}
+
+.card.ports .fr-handle.w {
+  left: -6px;
+  top: 50%;
+  margin-top: -6px;
+}
+
+.card.ports .fr-handle.e {
+  right: -6px;
+  top: 50%;
+  margin-top: -6px;
+}
+
+.card.small {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.readout {
+  padding: 8px 12px;
+  margin: 0;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}

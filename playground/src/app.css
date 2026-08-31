@@ -1,0 +1,49 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font: 14px/1.4 system-ui, sans-serif;
+}
+
+/*
+ * The library's .fr-viewport is height: 100%, so the parent sets the
+ * height. Without .board-host the board collapses to nothing and every
+ * e2e test fails on an empty boundingBox().
+ */
+.board-host {
+  height: 70vh;
+  border: 1px solid #ccc;
+  background: #fafafa;
+}
+
+.card {
+  display: inline-block;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.card.small {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+nav {
+  padding: 8px 12px;
+}
+
+nav a {
+  margin-right: 12px;
+}
+
+/*
+ * A port is an ordinary element inside the card's markup: the library
+ * only gives it a size and a shape, this stylesheet decides where it goes.
+ */
+.card .fr-handle {
+  vertical-align: middle;
+}

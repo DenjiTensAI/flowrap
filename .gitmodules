@@ -1,0 +1,4 @@
+[submodule "flowrap-specs"]
+	path = flowrap-specs
+	url = git@github.com:DenjiTensAI/flowrap-specs.git
+	update = none
